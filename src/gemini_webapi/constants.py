@@ -65,6 +65,11 @@ class Model(Enum):
         {"x-goog-ext-525001261-jspb": '[null,null,null,null,"e5a44cb1dae2b489"]'},
         True,
     )  # Deprecated, should be removed in the future
+    G_2_0_FLASH_THINKING_RESEARCH = (
+        "gemini-2.0-flash-thinking-research",
+        {"x-goog-ext-525001261-jspb": '[null,null,null,null,"6cb69cd4b6cae77d"]'},
+        True,
+    )  # Deprecated, should be removed in the future
 
     def __init__(self, name, header, advanced_only):
         self.model_name = name
