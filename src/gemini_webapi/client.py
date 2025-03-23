@@ -9,7 +9,7 @@ from typing import Any, Optional
 from httpx import AsyncClient, ReadTimeout
 
 from .constants import Endpoint, Headers, Model
-from .exceptions import AuthError, APIError, TimeoutError, GeminiError
+from .exceptions import AuthError, APIError, TimeoutError, GeminiError, NotReadyError
 from .types import WebImage, GeneratedImage, Candidate, ModelOutput
 from .utils import (
     upload_file,
@@ -297,8 +297,14 @@ class GeminiClient:
                 f"Failed to generate contents. Request failed with status code {response.status_code}"
             )
 
-        response_json = json.loads(response.text.split("\n")[2])
-        return response_json[0][2]  # Body of the response
+        try:
+            response_json = json.loads(response.text.split("\n")[2])
+            return response_json[0][2]  # Body of the response
+        except Exception:
+            await self.close()
+            raise NotReadyError(
+                "Failed to parse response body. Data structure is invalid."
+            )
 
     @running(retry=2)
     async def generate_content(

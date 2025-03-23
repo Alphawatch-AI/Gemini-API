@@ -14,6 +14,14 @@ class APIError(Exception):
     pass
 
 
+class NotReadyError(Exception):
+    """
+    Exception for errors returned from Gemini server which are not handled by the package.
+    """
+
+    pass
+
+
 class GeminiError(Exception):
     """
     Exception for errors returned from Gemini server which are not handled by the package.
