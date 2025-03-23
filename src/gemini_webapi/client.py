@@ -260,6 +260,46 @@ class GeminiClient:
                 self.cookies["__Secure-1PSIDTS"] = new_1psidts
             await asyncio.sleep(self.refresh_interval)
 
+    async def fetch_research(
+        self,
+        chat: "ChatSession",
+        **kwargs,
+    ) -> dict:
+        try:
+            response = await self.client.post(
+                Endpoint.BATCH_EXECUTE.value,
+                headers=Model.G_2_0_FLASH_THINKING_RESEARCH.model_header,
+                data={
+                    "at": self.access_token,
+                    "f.req": json.dumps(
+                        [
+                            [
+                                [
+                                    "hNvQHb",  # Can be fixed
+                                    f'["{chat.metadata[0]}",10,null,1,[1],null,null,1]',
+                                    None,
+                                    "generic",
+                                ]
+                            ]
+                        ],
+                    ),
+                },
+                **kwargs,
+            )
+        except ReadTimeout:
+            raise TimeoutError(
+                "Request timed out, please try again. If the problem persists, consider setting a higher `timeout` value when initializing GeminiClient."
+            )
+
+        if response.status_code != 200:
+            await self.close()
+            raise APIError(
+                f"Failed to generate contents. Request failed with status code {response.status_code}"
+            )
+
+        response_json = json.loads(response.text.split("\n")[2])
+        return response_json[0][2]  # Body of the response
+
     @running(retry=2)
     async def generate_content(
         self,
